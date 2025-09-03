@@ -7,13 +7,14 @@ export function generateStaticParams() {
   return routing.locales.map(locale => ({ locale }));
 }
 
-export default async function LocaleLayout(props: {
+// Usando tipagem explícita de Promise
+interface LayoutProps {
   children: React.ReactNode;
-  params: {
-    locale: string
-  }
-}) {
-  const resolvedParams = await Promise.resolve(props.params);
+  params: Promise<{ locale: string }>;
+}
+
+export default async function LocaleLayout({ children, params }: LayoutProps) {
+  const resolvedParams = await params;
   const locale = resolvedParams.locale || routing.defaultLocale;
   const messages = await getMessages({ locale });
 
@@ -23,7 +24,10 @@ export default async function LocaleLayout(props: {
         messages={messages}
         locale={locale}
       >
-        {props.children}
+        <div className="overflow-hidden w-full">
+          {children}
+          {/* <Footer /> */}
+        </div>
       </NextIntlClientProvider>
     </>
   );
